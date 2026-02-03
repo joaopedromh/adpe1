@@ -1,6 +1,7 @@
 import pandas as pd
-import matplotlib
-import seaborn as sea
+import matplotlib.pyplot as plt
+import seaborn as sns
+from datetime import datetime, timedelta
 
 
 # definir dataframe
@@ -93,6 +94,77 @@ df_clean['Time_Period'] = df_clean['Order_Hour'].apply(get_time_period)
 
 print("resultados após tratamento")
 print(df_clean[['Order_DateTime', 'Order_Weekday', 'Order_Hour', 'Time_Period']].head())
+
+
+# analise de distribuição
+
+# 1. Veículos (com porcentagens)
+plt.figure(figsize=(8, 5))
+ax = sns.countplot(
+    x='Vehicle',
+    data=df_clean,
+    order=df_clean['Vehicle'].value_counts().index,
+    palette='Set2'
+)
+
+# Adicionar porcentagens
+total = len(df_clean)
+for p in ax.patches:
+    percentage = f'{100 * p.get_height() / total:.1f}%'
+    ax.annotate(percentage, 
+                (p.get_x() + p.get_width() / 2., p.get_height()),
+                ha='center', va='bottom')
+
+plt.title('Distribuição de Veículos')
+plt.xlabel('')
+plt.ylabel('Número de Entregas')
+plt.show()
+
+# 2. Áreas
+plt.figure(figsize=(8, 5))
+ax = sns.countplot(
+    x='Area',
+    data=df_clean,
+    order=df_clean['Area'].value_counts().index,
+    palette='Set3'
+)
+
+for p in ax.patches:
+    percentage = f'{100 * p.get_height() / total:.1f}%'
+    ax.annotate(percentage, 
+                (p.get_x() + p.get_width() / 2., p.get_height()),
+                ha='center', va='bottom')
+
+plt.title('Distribuição por Área')
+plt.xlabel('')
+plt.ylabel('Número de Entregas')
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+plt.show()
+
+# 3. Top 10 Categorias
+plt.figure(figsize=(12, 6))
+top_10 = df_clean['Category'].value_counts().nlargest(10)
+ax = sns.barplot(
+    x=top_10.values,
+    y=top_10.index,
+    palette='crest'
+)
+
+# Adicionar valores
+for i, v in enumerate(top_10.values):
+    percentage = f'{100 * v / total:.1f}%'
+    ax.text(v + 3, i, f'{v} ({percentage})', va='center')
+
+plt.title('Top 10 Categorias de Produtos')
+plt.xlabel('Número de Entregas')
+plt.ylabel('')
+plt.tight_layout()
+plt.show()
+
+
+
+
 
 
 
