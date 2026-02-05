@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 from datetime import datetime, timedelta
 
 
@@ -55,6 +56,7 @@ df_clean = df.copy()
 
 df_clean = df_clean.dropna()
 
+# verificação de limpeza dos dados
 rows_cleaned = df.shape[0] - df_clean.shape[0]
 percentage_cleaned = (rows_cleaned / df.shape[0]) * 100
 print(f"deletadas {rows_cleaned} linhas, totalizando um percentual de {percentage_cleaned:.2f}%")
@@ -69,6 +71,8 @@ df_clean['Pickup_Time'] = pd.to_datetime(df_clean['Pickup_Time'], format = '%H:%
 df_clean['Order_DateTime'] = pd.to_datetime(
     df_clean['Order_Date'].astype(str) + ' ' + df_clean['Order_Time'].astype(str)
     )
+
+#criar períodos do dia
 
 # dt.dayofweek : Monday=0, Sunday=6.
 df_clean['Order_Weekday'] = df_clean['Order_DateTime'].dt.dayofweek
@@ -88,6 +92,7 @@ def get_time_period(hour):
     else:
         'Madrugada'
 
+#criar coluna order_hour
 df_clean['Time_Period'] = df_clean['Order_Hour'].apply(get_time_period)
 
 # verificar resultados
@@ -98,7 +103,7 @@ print(df_clean[['Order_DateTime', 'Order_Weekday', 'Order_Hour', 'Time_Period']]
 
 # analise de distribuição
 
-# 1. Veículos (com porcentagens)
+# veiculos mais utilizados
 plt.figure(figsize=(8, 5))
 ax = sns.countplot(
     x='Vehicle',
@@ -118,9 +123,9 @@ for p in ax.patches:
 plt.title('Distribuição de Veículos')
 plt.xlabel('')
 plt.ylabel('Número de Entregas')
-plt.show()
+#plt.show()
 
-# 2. Áreas
+# areas mais comuns
 plt.figure(figsize=(8, 5))
 ax = sns.countplot(
     x='Area',
@@ -140,9 +145,9 @@ plt.xlabel('')
 plt.ylabel('Número de Entregas')
 plt.xticks(rotation=45, ha='right')
 plt.tight_layout()
-plt.show()
+#plt.show()
 
-# 3. Top 10 Categorias
+# categorias mais vendidas
 plt.figure(figsize=(12, 6))
 top_10 = df_clean['Category'].value_counts().nlargest(10)
 ax = sns.barplot(
@@ -160,9 +165,39 @@ plt.title('Top 10 Categorias de Produtos')
 plt.xlabel('Número de Entregas')
 plt.ylabel('')
 plt.tight_layout()
-plt.show()
+#plt.show()
 
 
+### observa-se que:
+# uso de motos é mais frequente com 58.5%
+# area principal de entrega são as metropolitanas com 74.8%
+# os 3 principais produtos são eletronicos, livros e joias
+
+
+# correlação das notas dos agentes
+
+sns.set_style('whitegrid')
+plt.figure(figsize=(15,10))
+
+plt.subplot(2,2,1)
+
+sns.scatterplot(
+    x='Delivery_Time',
+    y='Agent_Rating',
+    data=df_clean,
+    alpha=0.6,
+    s=50
+)
+
+plt.title("Relação Nota x Tempo de Entrega")
+plt.xlabel("Tempo de Entrega")
+plt.ylabel("Nota do Entregador")
+
+# linha de tendencia
+
+z = np.polyfit(df_clean['Delivery_Time'], df_clean['Agent_Rating'], 1)
+p = np.poly1d(z)
+plt.plot(df_clean['Delivery_Time'], p(df_clean['Delivery_Time']), "r--", linewidth=2)
 
 
 
