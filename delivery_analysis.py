@@ -181,24 +181,48 @@ plt.figure(figsize=(15,10))
 
 plt.subplot(2,2,1)
 
-sns.scatterplot(
-    x='Delivery_Time',
-    y='Agent_Rating',
-    data=df_clean,
-    alpha=0.6,
-    s=50
+# criar lsita de notas
+
+notas = [0,1,2,3,4,5]
+label_nota = ['0-1','1-2', '2-3', '3-4','4-5']
+
+# criar categoria
+df_clean['Rating_Group'] = pd.cut(df_clean['Agent_Rating'], bins = notas, labels = label_nota)
+
+rating_time = df_clean.groupby('Rating_Group')['Delivery_Time'].mean().reset_index()
+
+sns.barplot(
+    x = 'Rating_Group',
+    y = 'Delivery_Time',
+    data = df_clean,
+    palette = 'viridis'
 )
 
-plt.title("Relação Nota x Tempo de Entrega")
-plt.xlabel("Tempo de Entrega")
-plt.ylabel("Nota do Entregador")
+plt.title("Relação de Nota pelo Tempo de Entrega")
+plt.xlabel("Nota do Agente")
+plt.ylabel("Tempo de Entrega")
+plt.xticks(rotation=45)
 
-# linha de tendencia
+for i, row in rating_time.iterrows():
+    plt.text(i, row['Delivery_Time'] + 1,
+             f"{row['Delivery_Time']:.1f}min",
+             ha='center', va='bottom')
 
-z = np.polyfit(df_clean['Delivery_Time'], df_clean['Agent_Rating'], 1)
-p = np.poly1d(z)
-plt.plot(df_clean['Delivery_Time'], p(df_clean['Delivery_Time']), "r--", linewidth=2)
+# Tempo de Entrega x Clima
+plt.subplot(2,2,2)
 
+sns.barplot(
+    x = 'Weather',
+    y = 'Delivery_Time',
+    data = df_clean,
+    palette='viridis'
+)
+
+plt.title('Tempo de Entrega de Acordo com o Clima')
+plt.xlabel('Condição do Clima')
+plt.ylabel('Tempo de Entrega')
+plt.xticks(rotation=45)
+plt.show()
 
 
 
