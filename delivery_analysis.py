@@ -194,7 +194,7 @@ rating_time = df_clean.groupby('Rating_Group')['Delivery_Time'].mean().reset_ind
 sns.barplot(
     x = 'Rating_Group',
     y = 'Delivery_Time',
-    data = df_clean,
+    data = rating_time,
     palette = 'viridis'
 )
 
@@ -207,6 +207,22 @@ for i, row in rating_time.iterrows():
     plt.text(i, row['Delivery_Time'] + 1,
              f"{row['Delivery_Time']:.1f}min",
              ha='center', va='bottom')
+    
+# calcular diferença percentual entre categorias
+
+time_45 = rating_time[rating_time['Rating_Group'] == '4-5']['Delivery_Time'].values[0]
+time_34 = rating_time[rating_time['Rating_Group'] == '3-4']['Delivery_Time'].values[0]
+
+time_diff_percentage = ((time_45 - time_34) / time_34) * 100
+
+print(f"media de tempo nota 3-4:  {time_34:.1f}")
+print(f"media de tempo nota 4-5:  {time_45:.1f}")
+print(f"diferença de tempo: {time_diff_percentage:.1f}")
+
+
+### observações
+# a diferença percentual do tempo de entrega entre os grupos '4-5' e '3-4' é de 28 %
+# notas maiores possuem tempos de entrega bem menores
 
 # Tempo de Entrega x Clima
 plt.subplot(2,2,2)
@@ -224,6 +240,8 @@ plt.ylabel('Tempo de Entrega')
 plt.xticks(rotation=45)
 plt.show()
 
+### observações
+# as condições climáticas não demonstram ser um fator que afeta o tempo de entrega
 
 
 
