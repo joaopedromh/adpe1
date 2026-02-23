@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 from datetime import datetime, timedelta
+from math import radians, sin, cos, sqrt, atan2
+
 
 
 # definir dataframe
@@ -243,6 +245,44 @@ plt.show()
 ### observações
 # as condições climáticas não demonstram ser um fator que afeta o tempo de entrega
 
+# Calcular distância entre loja e entrega
+
+def haversine(lat1, long1, lat2, long2):
+    R = 6371 # raio médio da terra
+
+    lat1, long1, lat2, long2 = map(radians, [lat1, long1, lat2, long2])
+    dlat = lat2 - lat1
+    dlong = long2 - long1
+
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlong/2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1-a))
+
+    return R * c
+
+# calculo dist x velocidade
+
+df_clean['Distance_km'] = df_clean.apply(
+    lambda x: haversine(x['Store_Latitude'], x['Store_Longitude'],
+                        x['Drop_Latitude'], x['Drop_Longitude']), axis=1
+)
+
+df_clean['Speed_kmh'] = (df_clean['Distance_km'] / (df_clean['Delivery_Time'] /60))
+
+# Top 10 entregadores mais rápidos (por velocidade média)
+top_speed = df_clean.groupby('Order_ID')['Speed_kmh'].mean().nlargest(10)
+
+
+
+# Exportar o CSV para usar no PowerBI
+
+'''df_clean.to_csv('delivery_analysis_amazon.csv', index=False)
+
+df_clean.to_csv(
+    'delivery_analysis_amazon_1.csv',
+    index=False,
+    sep=';',          # colunas com ponto e vírgula
+    decimal=','       # virgula como separador
+)'''
 
 
 
